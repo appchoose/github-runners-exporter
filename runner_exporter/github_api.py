@@ -22,6 +22,7 @@ class githubApi:
         github_token: str = None,
         github_app_id: str = None,
         private_key: str = None,
+        github_repository: str = None,
     ) -> None:
 
         if github_owner is None or github_owner.strip() == "":
@@ -37,6 +38,7 @@ class githubApi:
         self.github_app_id = github_app_id
         self.private_key = private_key
         self.github_owner = github_owner
+        self.github_repository = github_repository
         self.logger = logger
 
     def app_jwt_header(self):
@@ -141,7 +143,7 @@ class githubApi:
 
         return headers
 
-    def list_runners(self) -> list:
+    def list_org_runners(self) -> list:
         """
         Retrieves a list of the registered organization GitHub runners
 
@@ -154,6 +156,54 @@ class githubApi:
 
         per_page = 100
         url = f"https://api.github.com/orgs/{self.github_owner}/actions/runners?per_page={per_page}"
+
+        while True:
+            try:
+                self.logger.debug(f"Sending the api request for {url}")
+                result = requests.get(url, headers=headers)
+
+                if result.headers:
+                    remaining_requests = result.headers.get("X-RateLimit-Remaining")
+                    self.logger.debug(f"Remaining requests: {remaining_requests}")
+                    self.metric_runner_api_ratelimit.labels(self.github_owner).set(
+                        int(remaining_requests)
+                    )
+
+                if not result.ok:
+                    self.logger.error(
+                        f"Api request returned error: {result.reason} {result.text}"
+                    )
+                    return []
+
+                api_result = result.json()
+                runners_list += api_result["runners"]
+
+                if "next" in result.links.keys():
+                    url = result.links["next"]["url"]
+                else:
+                    break
+            except Exception as error:
+                self.logger.error(f"Exception: {error}")
+                return []
+
+        return runners_list
+
+    def list_repo_runners(self) -> list:
+        """
+        Retrieves a list of the registered organization GitHub runners
+
+        Returns:
+            list: A list containing the current registered runners
+        """
+        runners_list = []
+
+        if not self.github_repository:
+            return runners_list
+
+        headers = self.get_headers()
+
+        per_page = 100
+        url = f"https://api.github.com/repos/{self.github_owner}/{self.github_repository}/actions/runners?per_page={per_page}"
 
         while True:
             try:

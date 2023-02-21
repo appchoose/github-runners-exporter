@@ -7,10 +7,11 @@ Prometheus metrics exporter for github actions self-hosted runners.
 
 | Variable             | Required | Description |
 |----------------------|:--------:|----------------------------------------|
-| PRIVATE_GITHUB_TOKEN | Yes      | Github token with read org permissions
-| OWNER                | Yes      | Github organization name
-| REFRESH_INTERVAL     | No       | Internval time in seconds betwen api requests (Default: 20)
-| LOG_LEVEL            | No       | Log level: DEBUG, INFO, WARNING or ERROR (Default: INFO)
+| PRIVATE_GITHUB_TOKEN |   Yes    | Github token with read org permissions
+| OWNER                |   Yes    | Github organization name
+| GITHUB_REPOSITORY    |    No    | Github repository name
+| REFRESH_INTERVAL     |    No    | Internval time in seconds betwen api requests (Default: 20)
+| LOG_LEVEL            |    No    | Log level: DEBUG, INFO, WARNING or ERROR (Default: INFO)
 
 
 ## How to deploy

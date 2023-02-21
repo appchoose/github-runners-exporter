@@ -153,6 +153,7 @@ class runnerExports:
 def main():
     REFRESH_INTERVAL = int(os.getenv("REFRESH_INTERVAL", 20))
     PRIVATE_GITHUB_TOKEN = os.getenv("PRIVATE_GITHUB_TOKEN")
+    GITHUB_REPOSITORY = os.getenv("GITHUB_REPOSITORY")
     GITHUB_APP_ID = os.getenv("GITHUB_APP_ID")
     GITHUB_PRIVATE_KEY = os.getenv("GITHUB_PRIVATE_KEY")
     OWNER = os.getenv("OWNER")
@@ -169,10 +170,11 @@ def main():
         github_token=PRIVATE_GITHUB_TOKEN,
         github_app_id=GITHUB_APP_ID,
         private_key=GITHUB_PRIVATE_KEY,
+        github_repository=GITHUB_REPOSITORY,
     )
 
     while True:
-        runners_list = github.list_runners()
+        runners_list = github.list_org_runners() + github.list_repo_runners()
 
         if runners_list:
             runner_exports.export_metrics(runners_list)
